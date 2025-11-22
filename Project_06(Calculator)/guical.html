@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive JS Calculator</title>
+    <!-- Load Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the calculator grid and display */
+        .calculator-grid {
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 8px; /* Spacing between buttons */
+        }
+        .display {
+            grid-column: 1 / -1; /* Span all columns */
+            min-height: 80px;
+            font-size: 3rem;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+        .btn-op {
+            /* Operator buttons style */
+            background-color: #3498db; /* Blue */
+        }
+        .btn-action {
+            /* Equals and Clear style */
+            background-color: #e74c3c; /* Red */
+        }
+        .btn-number {
+            /* Number and dot buttons style */
+            background-color: #2c3e50; /* Darker Blue-Grey */
+        }
+        .btn-style {
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem; /* Rounded corners */
+            transition: background-color 0.1s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .btn-style:hover:not(:disabled) {
+            filter: brightness(1.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-sm">
+        <h1 class="text-3xl font-bold text-center text-white mb-6">JS Calculator</h1>
+        
+        <div id="calculator" class="calculator-grid grid bg-gray-800 p-4 rounded-xl shadow-2xl">
+            
+            <!-- Display -->
+            <div id="display" class="display bg-gray-700 text-white flex items-end justify-end p-4 rounded-lg mb-2 overflow-hidden">
+                0
+            </div>
+
+            <!-- Button Layout (4x4 Grid) -->
+            <!-- Row 1: Clear, Delete, Percent, Divide -->
+            <button class="btn-style btn-action text-white" data-value="AC">AC</button>
+            <button class="btn-style btn-op text-white" data-value="DEL">&larr;</button>
+            <button class="btn-style btn-op text-white" data-value="%">%</button>
+            <button class="btn-style btn-op text-white" data-value="/">/</button>
+
+            <!-- Row 2: 7, 8, 9, Multiply -->
+            <button class="btn-style btn-number text-white" data-value="7">7</button>
+            <button class="btn-style btn-number text-white" data-value="8">8</button>
+            <button class="btn-style btn-number text-white" data-value="9">9</button>
+            <button class="btn-style btn-op text-white" data-value="*">*</button>
+
+            <!-- Row 3: 4, 5, 6, Subtract -->
+            <button class="btn-style btn-number text-white" data-value="4">4</button>
+            <button class="btn-style btn-number text-white" data-value="5">5</button>
+            <button class="btn-style btn-number text-white" data-value="6">6</button>
+            <button class="btn-style btn-op text-white" data-value="-">-</button>
+
+            <!-- Row 4: 1, 2, 3, Add -->
+            <button class="btn-style btn-number text-white" data-value="1">1</button>
+            <button class="btn-style btn-number text-white" data-value="2">2</button>
+            <button class="btn-style btn-number text-white" data-value="3">3</button>
+            <button class="btn-style btn-op text-white" data-value="+">+</button>
+
+            <!-- Row 5: 0, Decimal, Equals -->
+            <button class="btn-style btn-number text-white col-span-2" data-value="0">0</button>
+            <button class="btn-style btn-number text-white" data-value=".">.</button>
+            <button class="btn-style btn-action text-white" data-value="=">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentExpression = '';
+        const display=document.getElementById('display');
+
+        function clearDisplay(){
+            currentExpression='';
+            display.textContent='0';
+        }
+        function deleteLast(){
+            if(currentExpression == 'Error'){
+                clearDisplay();
+                return;
+            }
+            currentExpression=currentExpression.slice(0,-1);
+            if(currentExpression===''){
+                display.textContent='0';
+            } else{
+                display.textContent=currentExpression;
+            }
+        }
+        function calculate(){
+            try{
+                //50%2 --> 50/100* 2 -->1
+                let finalExpression=currentExpression.replace(/%/g,'/100*');
+                if(finalExpression===''){
+                    display.textContent='0';
+                    return ;
+                }
+                let result=eval(finalExpression);
+                if(!isFinite(result)){
+                    currentExpression='Error';
+                    display.textContent='Error';
+                    return;
+                }
+                currentExpression=parseFloat(result.toFixed(10)).toString();
+                display.textContent=currentExpression;
+
+            } catch(error){
+                currentExpression='Error';
+                display.textContent='Error';
+            }
+        }
+        function appendValue(value){
+            if(currentExpression==='Error'){
+                currentExpression='';
+            }
+            if(value==='AC'){
+                clearDisplay();
+            } else if(value==='DEL'){
+                deleteLast();
+            } else if(value=== '='){
+                calculate();
+            } else {
+                currentExpression+=value;
+                display.textContent=currentExpression;
+            }
+                        
+        }
+        const buttons=document.querySelectorAll('#calculator button');
+
+        buttons.forEach( button=>{ 
+            button.addEventListener('click',()=>{
+                const value=button.getAttribute('data-value');
+                appendValue(value);
+            });
+        });
+        clearDisplay();
+    </script>
+
+</body>
+</html>
